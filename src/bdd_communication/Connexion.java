@@ -2,7 +2,7 @@ package bdd_communication;
 
 import java.sql.*;
 
-public class ConnexionEtudiant {
+public class Connexion {
   //On utilise ici le pattern Singleton pour s'assurer de n'avoir qu'une seule connexion à la BDD
   
   private static String url = "jdbc:mysql://localhost/mine_connection";
@@ -12,7 +12,7 @@ public class ConnexionEtudiant {
   private static Connection connexion;
   
   
-  private ConnexionEtudiant(){
+  private Connexion(){
     System.out.println("Connexion à la base de données...");
     try{      
       connexion = DriverManager.getConnection(url,user,password);
@@ -25,7 +25,8 @@ public class ConnexionEtudiant {
   }
   
   public static synchronized Connection getConnection(){
-    if (connexion == null) new ConnexionEtudiant();
+    if (connexion == null) new Connexion();
+    else System.out.println("Connexion récupérée !");
     return connexion;
   }
 }

@@ -3,17 +3,45 @@ package bdd_communication;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
+import java.util.HashSet;
 
-import utilisateur.Etudiant;
 import utilitaire.*;
 
-public abstract class DAO<T extends Identifiable> {
-  protected Connection connexion = null;
-  protected String table;
+public abstract class DAO<T extends Backupable> {
   
-  public DAO(String t, Connection c){
-    connexion = c;
+  // -----------------------------------------------------------------------------------------------------------------------
+  // ATTRIBUTS -------------------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------------------------------
+  
+  protected Connection connexion = Connexion.getConnection();
+  protected String table, champPrimaire = "id";
+  
+  // -----------------------------------------------------------------------------------------------------------------------
+  // CONSTRUCTEURS ---------------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------------------------------
+  
+  public DAO(String t){
     table = t;
+  }
+  
+  // -----------------------------------------------------------------------------------------------------------------------
+  // METHODES --------------------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------------------------------
+  
+  public Set<Integer> ids(){
+    Set<Integer> ids = new HashSet<Integer>();
+    try{
+      ResultSet r = connexion.prepareStatement("SELECT " + champPrimaire + " FROM " + table).executeQuery();
+      
+      while (r.next()) ids.add(r.getInt("id"));
+    } catch (SQLException ex) {
+      System.out.println("SQLException: " + ex.getMessage());
+      System.out.println("SQLState: " + ex.getSQLState());
+      System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    
+    return ids;
   }
   
   public int getNewID(){
@@ -25,7 +53,7 @@ public abstract class DAO<T extends Identifiable> {
 
         connexion.prepareStatement("INSERT INTO " + table + " VALUES ()").executeUpdate();
 
-        ResultSet r = connexion.prepareStatement("SELECT id FROM " + table + " WHERE id > " + idMax).executeQuery();
+        ResultSet r = connexion.prepareStatement("SELECT " + champPrimaire + " FROM " + table + " WHERE id > " + idMax).executeQuery();
         
         if (r.next()) id = r.getInt("id");
         
@@ -40,8 +68,8 @@ public abstract class DAO<T extends Identifiable> {
   public int getIDMax(){
     int idMax = 0;
     try{
-      ResultSet r = connexion.prepareStatement("SELECT MAX(id) FROM " + table).executeQuery();
-      if (r.next()) idMax = r.getInt("MAX(id)");
+      ResultSet r = connexion.prepareStatement("SELECT MAX(" + champPrimaire + ") FROM " + table).executeQuery();
+      if (r.next()) idMax = r.getInt("MAX(" + champPrimaire + ")");
     } catch (SQLException ex){
       System.out.println("SQLException: " + ex.getMessage());
       System.out.println("SQLState: " + ex.getSQLState());
@@ -54,8 +82,8 @@ public abstract class DAO<T extends Identifiable> {
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
       try{
-        connexion.prepareStatement("DELETE FROM " + table + " WHERE id = " + obj.getID()).executeUpdate();
-        reussi = true;
+        if( connexion.prepareStatement("DELETE FROM " + table + " WHERE " + champPrimaire + " = " + obj.getID()).executeUpdate() == 1) reussi = true;
+        
       } catch (SQLException ex){
         System.out.println("SQLException: " + ex.getMessage());
         System.out.println("SQLState: " + ex.getSQLState());
@@ -69,7 +97,7 @@ public abstract class DAO<T extends Identifiable> {
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
       try{
-        connexion.prepareStatement("DELETE FROM " + table + " WHERE id = " + id).executeUpdate();
+        connexion.prepareStatement("DELETE FROM " + table + " WHERE " + champPrimaire + " = " + id).executeUpdate();
         reussi = true;
       } catch (SQLException ex){
         System.out.println("SQLException: " + ex.getMessage());
@@ -81,7 +109,31 @@ public abstract class DAO<T extends Identifiable> {
     }
     return reussi;
   }
-  public abstract boolean update(T obj);
-  public abstract T chercher(int id);
+  public boolean update(T obj) {
+    boolean reussi = false;
+    synchronized(DBModification.getInstance()){
+      try{
+        ResultSet r = connexion.createStatement().executeQuery("SELECT * FROM " + table + " WHERE " + champPrimaire + " = " + obj.getID());
+        
+        if (r.next()){
+          String query = "UPDATE " + table + " SET " + obj.getUpdate() + " WHERE " + champPrimaire + " = " + obj.getID() ;
+          connexion.prepareStatement(query).executeUpdate();
+          
+          reussi = true;
+        }
+        
+      } catch (SQLException ex){
+        System.out.println("SQLException: " + ex.getMessage());
+        System.out.println("SQLState: " + ex.getSQLState());
+        System.out.println("VendorError: " + ex.getErrorCode());
+      }
+    }
+    return reussi;
+  }
   
+  public abstract T chercher(int id);  
+  
+  protected void setChampPrimaire(String s){
+    champPrimaire = s;
+  }
 }
