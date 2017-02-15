@@ -67,7 +67,7 @@ public class Etudiant extends Utilisateur {
     return promo;
   }
   public String getUpdate(){
-    return "nom = '" + nom + "', prenom = '" + prenom + "', telephone = '" + telephone + "', promotion = '" + promo;
+    return "nom = '" + nom + "', prenom = '" + prenom + "', telephone = '" + telephone + "', promotion = " + promo;
   }
   
   public void setNom(String n){
@@ -121,7 +121,7 @@ public class Etudiant extends Utilisateur {
 //  }
   
    public String toString(){
-     return "Étudiant n°" + IDENTIFIANT + ", " + prenom + " " + nom + ", " + telephone + ", P" + promo;
+     return "Étudiant n°" + IDENTIFIANT + ", " + prenom + " " + nom + " ( P " + promo + " )";
    }
    
    public boolean equals (Object o){

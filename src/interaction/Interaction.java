@@ -26,6 +26,7 @@ public abstract class Interaction implements Backupable {
     nom = n;
     description = d;
     places = p;
+    placesRestantes = p;
     createur = c;
   }
   

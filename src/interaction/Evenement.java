@@ -87,7 +87,9 @@ public class Evenement extends Interaction {
         "', places = " + places + 
         ", places_restantes = " + placesRestantes + 
         ", date = '" + date + 
-        "', duree = " + duree;
+        "', duree = " + duree +
+        ", debut_h = " + debutH +
+        ", debut_m = " + debutM;
     if (createur instanceof Etudiant) update += " , createur_est_etudiant = TRUE , " +
     		                                      "createur_etudiant_id = " + createur.getID() + 
     		                                      " , createur_association_id = NULL";
@@ -133,9 +135,10 @@ public class Evenement extends Interaction {
   
   @Override
   public String toString(){
-   return "Événement n°" + IDENTIFIANT + " : " + nom + 
-          ". Début : " + date + " à " + debutH + "h " + debutM + "min. " +
-          "Durée : " + getDureeHM() + ". Créé par " + createur; 
+//   return "Événement n°" + IDENTIFIANT + " : " + nom + 
+//          ". Début : " + date + " à " + debutH + "h " + debutM + "min. " +
+//          "Durée : " + getDureeHM() + ". Créé par " + createur; 
+    return nom + " ( " + date + " : " + debutH + " ) ";
   }
   
   @Override
@@ -176,9 +179,29 @@ public class Evenement extends Interaction {
     placesUpdate = true;
   }
   
-  public boolean ajouterParticipant(Etudiant e){
-    boolean reussi = dae.ajouterParticipant(this, e);
+  public boolean ajouterPrincipale(Etudiant e){
+    boolean reussi = dae.ajouterPrincipale(this, e);
     if (reussi) placesRestantes--;
+    update();
     return reussi;
+  }
+  
+  public boolean ajouterAttente(Etudiant e){
+    return dae.ajouterAttente(this, e);
+  }
+  
+  // Renvoie 0 si ok, 1 si attente, 2 si déjà dedans
+  public int ajouter(Etudiant e){
+    if (placesRestantes > 0 ) {
+      ajouterPrincipale(e);
+      return 0;
+    }
+    
+    else if (participe(e)) return 2;
+    
+    else {
+      ajouterAttente(e);
+      return 0;
+    }
   }
 }

@@ -29,9 +29,9 @@ public class DAEvenement extends DAO<Evenement> {
       try{
         if (id != -1){
           String stmt = "CREATE TABLE IF NOT EXISTS evt_" + id + " (" +
-              "ordre_adhesion INT UNSIGNED NOT NULL, " +
+              "ordre_adhesion INT UNSIGNED AUTO_INCREMENT NOT NULL, " +
               "id_etudiant INT UNSIGNED NOT NULL, " +
-              "date_adhesion DATE NOT NULL, " +
+              "date_adhesion DATE NoT NULL, " +
               "liste_principale BOOLEAN NOT NULL, " +
               "PRIMARY KEY(ordre_adhesion)," +
               "CONSTRAINT fk_id_etudiant_" + id + " FOREIGN KEY (id_etudiant) REFERENCES Etudiant(id)" +
@@ -172,20 +172,19 @@ public class DAEvenement extends DAO<Evenement> {
     return inscrits;
   }
   
-  public boolean ajouterParticipant(Evenement evt, Etudiant e){
+  public boolean ajouterPrincipale(Evenement evt, Etudiant e){
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
       try{
-        ResultSet r = connexion.prepareStatement("SELECT places_restantes FROM Evenement WHERE id = " + evt.getID()).executeQuery();
-        if (r.next()){
-          if (r.getInt("places_restantes") > 0 && !evt.inscrits().contains(e)){
-            if (connexion.prepareStatement("INSERT INTO " + evt.getTable() + " VALUES " +
-                "(id_etudiant = " + e.getID() + 
-                ", date_adhesion = " + new Date((new java.util.Date()).getTime()) + 
-                ", liste_principale = TRUE)")
-                .executeUpdate() == 1 )
-              reussi = true;
-          }
+        if (evt.getPlacesRestantes() > 0 && !evt.inscrits().contains(e)){
+          java.sql.Date maintenant = new java.sql.Date((new java.util.Date()).getTime());
+          String query = "INSERT INTO " + evt.getTable() + " (id_etudiant,date_adhesion,liste_principale) VALUES " +
+              "( " + e.getID() + 
+              ", '" + maintenant +
+              "', TRUE)";
+          // + 
+          if (connexion.prepareStatement(query).executeUpdate() == 1 )
+            reussi = true;
         }
       } catch (SQLException ex){
         System.out.println("SQLException: " + ex.getMessage());
@@ -194,5 +193,40 @@ public class DAEvenement extends DAO<Evenement> {
       }
       return reussi;
     }
+  }
+  
+  public boolean ajouterAttente(Evenement evt, Etudiant e){
+    boolean reussi = false;
+    synchronized(DBModification.getInstance()){
+      try{
+        java.sql.Date maintenant = new java.sql.Date((new java.util.Date()).getTime());
+        String query = "INSERT INTO " + evt.getTable() + " (id_etudiant,date_adhesion,liste_principale) VALUES " +
+            "( " + e.getID() + 
+            ", '" + maintenant +
+            "', FALSE)";
+        if (connexion.prepareStatement(query).executeUpdate() == 1 )
+          reussi = true;
+
+      } catch (SQLException ex){
+        System.out.println("SQLException: " + ex.getMessage());
+        System.out.println("SQLState: " + ex.getSQLState());
+        System.out.println("VendorError: " + ex.getErrorCode());
+      }
+    }
+    return reussi;
+  }
+  
+  public int placesRestantes(Evenement evt){
+    int restantes = 0;
+    try{
+      ResultSet r = connexion.prepareStatement("SELECT places_restantes FROM Evenement WHERE id = " + evt. getID()).executeQuery();
+      if(r.next()) restantes = r.getInt("places_restantes");
+    } catch (SQLException ex){
+      System.out.println("SQLException: " + ex.getMessage());
+      System.out.println("SQLState: " + ex.getSQLState());
+      System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    
+    return restantes;
   }
 }
