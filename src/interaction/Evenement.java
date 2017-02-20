@@ -6,6 +6,8 @@ import java.util.Set;
 import utilisateur.*;
 import exception.*;
 
+// Classe métier de la gestion d'événement: seule cette classe se sert du DAO.
+
 public class Evenement extends Interaction {
 
   //------------------------------------------------------------------------------------------------------------------------
@@ -22,6 +24,7 @@ public class Evenement extends Interaction {
   // -----------------------------------------------------------------------------------------------------------------------
   
   public Evenement(String nom, String description, int places, Date date, int debutH, int debutM, int duree, Utilisateur createur){
+    // On récupère un nouvel ID, et on met à jour les variables
     super(dae.getNewID(),nom,description,places,createur);
 
     this.debutH = debutH + ((int) debutM / 60);
@@ -32,10 +35,12 @@ public class Evenement extends Interaction {
     this.date.setTime(this.date.getTime() + nbJours * 24 * 60 * 60 * 10000);
     this.duree = duree;
     
+    // On met à jour l'objet créé par dae.getNewID()
     dae.update(this);
     if (IDENTIFIANT == -1) throw new InvalidIDException("");
   }
   
+  // Créer un événement à partir d'un ResultSet
   public Evenement(ResultSet r) throws SQLException{
     super(r.getInt("id"), "", "", 0, null);
     try {
@@ -98,6 +103,7 @@ public class Evenement extends Interaction {
     		           "createur_association_id = " + createur.getID();
     return update;
   }
+  // Le nom de la table spécifique à l'événement
   public String getTable(){
     return "evt_" + IDENTIFIANT;
   }
@@ -124,6 +130,7 @@ public class Evenement extends Interaction {
   
   public boolean update(){
     boolean reussi = dae.update(this);
+    // On ne fait appel à updateEvenement que si on a modifié le nombre total de places (vérifier que l'on a toujours placesRestantes > 0)
     if (reussi && placesUpdate) reussi &= dae.updateEvenement(this).isEmpty();
     if (reussi) placesUpdate = false;
     return reussi;
@@ -169,6 +176,7 @@ public class Evenement extends Interaction {
     return date.getTime() <= evt.date.getTime();
   }
   
+  // Renvoie true ssi l'étudiant est sur liste principale
   public boolean participe(Etudiant e){
     return participants().contains(e);
   }
@@ -192,16 +200,15 @@ public class Evenement extends Interaction {
   
   // Renvoie 0 si ok, 1 si attente, 2 si déjà dedans
   public int ajouter(Etudiant e){
-    if (placesRestantes > 0 ) {
+    if(inscrits().contains(e)) return 2;
+    else if (placesRestantes > 0 ) {
       ajouterPrincipale(e);
       return 0;
     }
     
-    else if (participe(e)) return 2;
-    
     else {
       ajouterAttente(e);
-      return 0;
+      return 1;
     }
   }
 }

@@ -15,6 +15,7 @@ public class Etudiant extends Utilisateur {
   //  Date naissance;
   //  Calendrier calendrier;
   
+  // Objet d'accès à la BDD
   private static DAEtudiant dae = new DAEtudiant();
   
  //------------------------------------------------------------------------------------------------------------------------
@@ -124,9 +125,16 @@ public class Etudiant extends Utilisateur {
      return "Étudiant n°" + IDENTIFIANT + ", " + prenom + " " + nom + " ( P " + promo + " )";
    }
    
+   @Override
+   public int hashCode(){
+     return IDENTIFIANT;
+   }
+   @Override
    public boolean equals (Object o){
-     if (!(o instanceof Etudiant)) return false;
+     if ( o == null ) return false;
+     if ( o == this ) return true;
      
+     if (!(o instanceof Etudiant)) return false;
      Etudiant e = (Etudiant) o;
      return e.getID() == IDENTIFIANT;
    }

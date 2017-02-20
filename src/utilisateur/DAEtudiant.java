@@ -10,6 +10,7 @@ class DAEtudiant extends DAO<Etudiant> {
   // -----------------------------------------------------------------------------------------------------------------------
 
   public DAEtudiant() {
+    //Donne le nom de la table dans lequel on va devoir chercher
     super("Etudiant");
   }
 

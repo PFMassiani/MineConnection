@@ -29,6 +29,7 @@ public abstract class DAO<T extends Backupable> {
   // METHODES --------------------------------------------------------------------------------------------------------------
   // -----------------------------------------------------------------------------------------------------------------------
   
+  // Renvoie l'ensemble des valeurs de la clé primaire présentes dans la table
   public Set<Integer> ids(){
     Set<Integer> ids = new HashSet<Integer>();
     try{
@@ -44,6 +45,8 @@ public abstract class DAO<T extends Backupable> {
     return ids;
   }
   
+  // Fournit une nouvel identifiant basé sur une nouvelle valeur de la clé primaire de la table.
+  // Créée par la même occasion un objet dans la base de données, identifié avec l'identifiant créé.
   public int getNewID(){
     int id = -1, idMax = 0;
     synchronized(DBModification.getInstance()){
@@ -65,6 +68,8 @@ public abstract class DAO<T extends Backupable> {
     }
     return id;
   }
+  
+  // Retroune la valeur maximale de clé primaire
   public int getIDMax(){
     int idMax = 0;
     try{
@@ -78,6 +83,7 @@ public abstract class DAO<T extends Backupable> {
     return idMax;
   }
   
+  // Supprime l'objet de la table
   public boolean supprimer(T obj) {
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
@@ -93,6 +99,8 @@ public abstract class DAO<T extends Backupable> {
     }
     return reussi;
   }
+  
+  // Supprime l'objet d'identifiant id de la table
   public boolean supprimer(int id) {
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
@@ -109,6 +117,8 @@ public abstract class DAO<T extends Backupable> {
     }
     return reussi;
   }
+  
+  // Met à jour l'objet via sa méthode getUpdate ( T est un sous type de Backupable )
   public boolean update(T obj) {
     boolean reussi = false;
     synchronized(DBModification.getInstance()){

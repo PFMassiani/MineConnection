@@ -1,9 +1,9 @@
 package interaction;
 
-import java.util.*;
-
 import utilisateur.*;
 import utilitaire.*;
+
+// Classe mère de PAPS et de Evenement
 
 public abstract class Interaction implements Backupable {
 

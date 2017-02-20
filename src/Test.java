@@ -7,26 +7,29 @@ import interaction.*;
 
 public class Test {
   public static void main(String[] args0) throws DuplicateIdentifierException{
-//    Evenement e = Evenement.chercher(34);
-//    Set<Etudiant> ets = e.participants();
-//    Set<Etudiant> ets2 = e.participants();
-//    Set<Etudiant> ets3 = new HashSet<>(ets);
-//    for (Etudiant et : ets) {
-//      System.out.println(et + " participe à l'événement: " + ets.contains(et));
-//      System.out.println(et + " participe à l'événement: " + ets2.contains(et));
-//      System.out.println(et + " participe à l'événement: " + ets3.contains(et));
-//    }
-//    
-//    System.out.println(ets);
-//    System.out.println(ets2);
-//    System.out.println(ets3);
+    Set<Integer> ids_evt = Evenement.ids();
+    Iterator<Integer> it = ids_evt.iterator();
+    Evenement e = Evenement.chercher(it.next());
+    Set<Etudiant> ets = e.participants();
+    Set<Etudiant> ets2 = e.participants();
+    Set<Etudiant> ets3 = new HashSet<>(ets);
+    for (Etudiant et : ets) {
+      System.out.println(et + " participe à l'événement: " + ets.contains(et));
+      System.out.println(et + " participe à l'événement: " + ets2.contains(et));
+      System.out.println(et + " participe à l'événement: " + ets3.contains(et));
+    }
     
-    viderEvenement();
-    evenementParticipants();
-    System.out.println("Done!");
+    System.out.println(ets);
+    System.out.println(ets2);
+    System.out.println(ets3);
+    
+//    viderEvenement();
+//    evenementParticipants();
+//    System.out.println("Done!");
   
   }
   
+  // Remplit la table Etudiant
   public static void remplirEtudiant(){
     String nom[] = {"Massiani", "Martinelli","Legrand","Li"};
     String prenom[] = {"Pierre-François", "Giacomo","Domitille","Nicolas"};
@@ -39,6 +42,7 @@ public class Test {
     System.out.println("Table remplie !");
   }
   
+  // Vide la table Etudiant
   public static void viderEtudiant(){
     for (int i = 1; i <= Etudiant.getIDMax(); i++){
       Etudiant.supprimer(i);
@@ -46,6 +50,7 @@ public class Test {
     System.out.println("Table vidée !");
   }
   
+  // Affiche la table Etudiant
   public static void afficherEtudiant(){
     Set<Integer> ids = Etudiant.ids();
     for (int i : ids){
@@ -53,23 +58,28 @@ public class Test {
     }
   }
   
+  // Créée deux événements vides
   public static void remplirEvenement(){
-    String[] nom = {"Soirée Minception", "Amphi retap"};
-    String[] description = {"La soirée de la meilleure liste", "Test"};
+    String[] nom = {"Soirée liste", "Amphi retap"};
+    String[] description = {"La soirée de la meilleure liste", "Advancy"};
     int[] places = {10,20};
     java.sql.Date[] date = {new java.sql.Date((new java.util.Date()).getTime()), new java.sql.Date(1000000000)};
     int[] debutH = {1,2}, debutM = {30,40}, duree = {3,4};
-    Etudiant[] e = {Etudiant.chercher(75), Etudiant.chercher(76)};
+    Set<Integer> ids = Etudiant.ids();
+    Iterator<Integer> it = ids.iterator();
+    Etudiant[] e = {Etudiant.chercher(it.next()), Etudiant.chercher(it.next())};
     
     for (int i = 0; i < 2; i++) new Evenement(nom[i],description[i], places[i], date[i], debutH[i], debutM[i],duree[i],e[i]);
   }
   
+  // Supprime tous les événements
   public static void viderEvenement(){
     Set<Integer> id = Evenement.ids();
     Iterator<Integer> it = id.iterator();
     while (it.hasNext()) Evenement.chercher(it.next()).supprimer();
   }
   
+  // Créée un événement avec tous les étudiants qui y participent
   public static Evenement evenementParticipants(){
     Evenement evt = new Evenement("Événement test", "Test", 10, new java.sql.Date((new java.util.Date()).getTime()), 10,20,30,Etudiant.chercher(71));
     Set<Integer> ids = Etudiant.ids();
@@ -77,6 +87,7 @@ public class Test {
     return evt;
   }
   
+  // Teste l'antécédence entre tous les événements
   public static void testerAntecedence(){
     Set<Integer> ids = Evenement.ids();
     Evenement e,f;
@@ -89,6 +100,7 @@ public class Test {
     }
   }
   
+  // Teste la compatibilité ( = la possibilité d'assister aux deux ) de tous les événements
   public static void testerCompatibilite(){
     Set<Integer> ids = Evenement.ids();
     Evenement e,f;
