@@ -181,6 +181,10 @@ public class Evenement extends Interaction {
     return participants().contains(e);
   }
   
+  public boolean estInscrit(Etudiant e){
+    return inscrits().contains(e);
+  }
+  
   public void setPlaces(int places){
     this.places = places;
     placesRestantes = places - ids().size();
@@ -210,5 +214,14 @@ public class Evenement extends Interaction {
       ajouterAttente(e);
       return 1;
     }
+  }
+  
+  public boolean supprimerInscrit(Etudiant e){
+    boolean participe = participe(e), reussi = dae.supprimerInscrit(this, e);
+    if (reussi && participe) {
+      placesRestantes ++;
+      update();
+    }
+    return reussi;
   }
 }

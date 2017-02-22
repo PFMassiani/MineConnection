@@ -240,4 +240,17 @@ public class DAEvenement extends DAO<Evenement> {
     
     return restantes;
   }
+  
+  public boolean supprimerInscrit (Evenement evt, Etudiant e){
+    if (!evt.estInscrit(e)) return false;
+    
+    try {
+      connexion.prepareStatement("DELETE FROM " + evt.getTable() + " WHERE id_etudiant = " + e.getID()).executeUpdate();
+    } catch (SQLException ex) {
+      System.out.println("SQLException: " + ex.getMessage());
+      System.out.println("SQLState: " + ex.getSQLState());
+      System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    return true;
+  }
 }

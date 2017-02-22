@@ -7,25 +7,8 @@ import interaction.*;
 
 public class Test {
   public static void main(String[] args0) throws DuplicateIdentifierException{
-    Set<Integer> ids_evt = Evenement.ids();
-    Iterator<Integer> it = ids_evt.iterator();
-    Evenement e = Evenement.chercher(it.next());
-    Set<Etudiant> ets = e.participants();
-    Set<Etudiant> ets2 = e.participants();
-    Set<Etudiant> ets3 = new HashSet<>(ets);
-    for (Etudiant et : ets) {
-      System.out.println(et + " participe à l'événement: " + ets.contains(et));
-      System.out.println(et + " participe à l'événement: " + ets2.contains(et));
-      System.out.println(et + " participe à l'événement: " + ets3.contains(et));
-    }
-    
-    System.out.println(ets);
-    System.out.println(ets2);
-    System.out.println(ets3);
-    
-//    viderEvenement();
-//    evenementParticipants();
-//    System.out.println("Done!");
+   Etudiant e = Etudiant.chercher(71);
+   System.out.println(e.encoder());
   
   }
   

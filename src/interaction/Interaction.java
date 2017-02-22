@@ -1,11 +1,12 @@
 package interaction;
 
 import utilisateur.*;
+import serveur_communication.*;
 import utilitaire.*;
 
 // Classe mère de PAPS et de Evenement
 
-public abstract class Interaction implements Backupable {
+public abstract class Interaction extends Encodable implements Backupable {
 
   // -----------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTS -------------------------------------------------------------------------------------------------------------
