@@ -187,6 +187,7 @@ public class ServeurVirtuel extends Thread {
       
       if (m.getReturnType() == ids.getClass()) ids = (Set<Integer>) m.invoke(null, (Object) null);
       
+      // TODO Envoyer les ids
     } catch (ClassNotFoundException | 
         IllegalAccessException | 
         IllegalArgumentException | 
@@ -199,7 +200,22 @@ public class ServeurVirtuel extends Thread {
   }
   
   public void envoyerAll(TypeBackupable type){
-    // TODO
-  }
+    Class<?> c = null;
+    try{
+     
+      c = Class.forName(type.getNomClasse());
+      Method m = c.getDeclaredMethod("getAll", (Class<?>) null);
+      Set<?> all = (Set<?>) m.invoke(null, (Object) null);
+      
+      // TODO Envoyer all
+    } catch (ClassNotFoundException | 
+        IllegalAccessException | 
+        IllegalArgumentException | 
+        InvocationTargetException e){
+      e.printStackTrace();
+    } catch (NoSuchMethodException e){
+      System.err.println("Erreur: la classe " + c.getName() + " n'implémente pas la méthode static Set<Integer> supprimer()");
+      e.printStackTrace();
+    }  }
   
 }

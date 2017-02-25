@@ -1,10 +1,10 @@
 package serveur_communication;
 
 public enum TypeBackupable {
-  ETUDIANT("Etudiant"),
-  ASSOCIATION("Association"),
-  EVENEMENT("Evenement"),
-  PAPS("PAPS");
+  ETUDIANT("utilisateur.Etudiant"),
+  ASSOCIATION("utilisateur.Association"),
+  EVENEMENT("interaction.Evenement"),
+  PAPS("interaction.PAPS");
   
   String nom;
   

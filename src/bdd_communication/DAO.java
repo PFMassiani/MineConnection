@@ -65,18 +65,18 @@ public abstract class DAO<T extends Backupable> {
     }
     return id;
   }
-//  public int getIDMax(){
-//    int idMax = 0;
-//    try{
-//      ResultSet r = connexion.prepareStatement("SELECT MAX(" + champPrimaire + ") FROM " + table).executeQuery();
-//      if (r.next()) idMax = r.getInt("MAX(" + champPrimaire + ")");
-//    } catch (SQLException ex){
-//      System.out.println("SQLException: " + ex.getMessage());
-//      System.out.println("SQLState: " + ex.getSQLState());
-//      System.out.println("VendorError: " + ex.getErrorCode());
-//    }
-//    return idMax;
-//  }
+  public int getIDMax(){
+    int idMax = 0;
+    try{
+      ResultSet r = connexion.prepareStatement("SELECT MAX(" + champPrimaire + ") FROM " + table).executeQuery();
+      if (r.next()) idMax = r.getInt("MAX(" + champPrimaire + ")");
+    } catch (SQLException ex){
+      System.out.println("SQLException: " + ex.getMessage());
+      System.out.println("SQLState: " + ex.getSQLState());
+      System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    return idMax;
+  }
   
   public boolean supprimer(T obj) {
     boolean reussi = false;
