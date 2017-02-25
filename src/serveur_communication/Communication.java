@@ -3,14 +3,15 @@ package serveur_communication;
 import exception.InvalidParameterException;
 import utilisateur.Utilisateur;
 import interaction.Interaction;
+import utilitaire.Backupable;
 
 public class Communication {
   private TypeBackupable type;
   private Action action;
-  private Object o;
+  private Backupable o;
   private int id;
 
-  public Communication(TypeBackupable type, Action action, Object o) throws InvalidParameterException{
+  public Communication(TypeBackupable type, Action action, Backupable o) throws InvalidParameterException{
     this.type = type;
     this.action = action;
     this.o = o;
@@ -18,7 +19,7 @@ public class Communication {
     switch (action){
     case SAUVEGARDER:
     case SUPPRIMER_OBJ:
-      if (o == null || (!(o instanceof Utilisateur) && !(o instanceof Interaction))) throw new InvalidParameterException("L'action demandée requiert un objet de type Utilisateur ou Interaction");
+      if (o == null) throw new InvalidParameterException("L'action demandée requiert un objet de type Utilisateur ou Interaction");
       break;
     default:
       break;
@@ -49,7 +50,7 @@ public class Communication {
   public int getID(){
     return id;
   }
-  public Object getObject(){
+  public Backupable getObjet(){
     return o;
   }
 }

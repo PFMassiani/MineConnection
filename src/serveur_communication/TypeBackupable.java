@@ -6,7 +6,7 @@ public enum TypeBackupable {
   EVENEMENT("interaction.Evenement"),
   PAPS("interaction.PAPS");
   
-  String nom;
+  private String nom;
   
   TypeBackupable(String nom){
     this.nom = nom;

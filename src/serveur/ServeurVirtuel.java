@@ -4,16 +4,17 @@ import interaction.Evenement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.util.Collections;
 import java.util.Set;
 import java.io.*;
 
 import serveur_communication.*;
 import utilisateur.Etudiant;
+import utilitaire.Backupable;
 import exception.*;
 
 public class ServeurVirtuel extends Thread {
   
+  @SuppressWarnings("unused")
   private Socket client;
   private InputStream is;
   private ObjectInputStream ois;
@@ -58,7 +59,7 @@ public class ServeurVirtuel extends Thread {
             envoyerObjet(com.getType(), com.getID());
             break;
           case SAUVEGARDER:
-            sauvegarderObjet(com.getObject());
+            sauvegarderObjet(com.getObjet());
             break;
           case SUPPRIMER_ID:
           case SUPPRIMER_OBJ:
@@ -85,33 +86,20 @@ public class ServeurVirtuel extends Thread {
   }
   
   public void envoyerObjet(TypeBackupable type, int id){
-    switch(type){
-    case ETUDIANT:
-      Etudiant e = Etudiant.chercher(id);
-      try{
-        oos.writeObject(e);
-        oos.flush();
-      } catch (IOException ex){
-        ex.printStackTrace();
-      }
-      break;
-    case ASSOCIATION:
-      // TODO Quand les associations seront implémentées
-      break;
-    case EVENEMENT:
-      Evenement evt = Evenement.chercher(id);
-      try{
-        oos.writeObject(evt);
-        oos.flush();
-      } catch(IOException ex){
-        ex.printStackTrace();
-      }
-      break;
-    case PAPS:
-      // TODO Quand les PAPS seront implémentés
-      break;
-      default:
-        break;
+    Class<?> c = null;
+    try{
+      c = Class.forName(type.getNomClasse());
+      Method m = c.getDeclaredMethod("chercher", int.class);
+      
+      Object retour = m.invoke(null, id);
+      
+      oos.writeObject(c.cast(retour));
+      
+    } catch (ClassNotFoundException| IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e){
+      e.printStackTrace();
+    } catch (NoSuchMethodException e){
+      System.err.println("La classe " + c + " n'implémente pas la méthode ? chercher(int id)");
+      e.printStackTrace();
     }
   }
   
@@ -129,7 +117,7 @@ public class ServeurVirtuel extends Thread {
     boolean reussi = false;
 
     if (com.getAction() == Action.SUPPRIMER_OBJ){
-      Object o = com.getObject();
+      Backupable o = com.getObjet();
 
       // On récupère la classe de o
       Class<?> c = o.getClass();
@@ -174,19 +162,17 @@ public class ServeurVirtuel extends Thread {
 
     return reussi;
   }
-  
-  // On supprime cet avertissement, car on vérifie bien l'égalité des types
-  @SuppressWarnings("unchecked")
+ 
+
   public void envoyerIDs (TypeBackupable type){
     Class<?> c = null;
     try{
-     
+
       c = Class.forName(type.getNomClasse());
       Method m = c.getDeclaredMethod("ids", (Class<?>) null);
-      Set<Integer> ids = Collections.EMPTY_SET;
-      
-      if (m.getReturnType() == ids.getClass()) ids = (Set<Integer>) m.invoke(null, (Object) null);
-      
+      Set<?> ids = (Set<?>) m.invoke(null, (Object) null);
+
+      oos.writeObject(ids);
       // TODO Envoyer les ids
     } catch (ClassNotFoundException | 
         IllegalAccessException | 
@@ -196,17 +182,20 @@ public class ServeurVirtuel extends Thread {
     } catch (NoSuchMethodException e){
       System.err.println("Erreur: la classe " + c.getName() + " n'implémente pas la méthode static Set<Integer> supprimer()");
       e.printStackTrace();
+    } catch (IOException e){
+      e.printStackTrace();
     }
   }
-  
+
   public void envoyerAll(TypeBackupable type){
     Class<?> c = null;
     try{
-     
+
       c = Class.forName(type.getNomClasse());
       Method m = c.getDeclaredMethod("getAll", (Class<?>) null);
       Set<?> all = (Set<?>) m.invoke(null, (Object) null);
-      
+
+      oos.writeObject(all);
       // TODO Envoyer all
     } catch (ClassNotFoundException | 
         IllegalAccessException | 
@@ -214,8 +203,10 @@ public class ServeurVirtuel extends Thread {
         InvocationTargetException e){
       e.printStackTrace();
     } catch (NoSuchMethodException e){
-      System.err.println("Erreur: la classe " + c.getName() + " n'implémente pas la méthode static Set<Integer> supprimer()");
+      System.err.println("Erreur: la classe " + c.getName() + " n'implémente pas la méthode static Set<?> getAll()");
       e.printStackTrace();
-    }  }
-  
+    } catch (IOException e){
+      e.printStackTrace();
+    }
+  }
 }
