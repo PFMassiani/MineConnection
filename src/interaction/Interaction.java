@@ -1,13 +1,18 @@
 package interaction;
 
+import java.io.Serializable;
+
 import utilisateur.*;
-import serveur_communication.*;
 import utilitaire.*;
 
 // Classe mère de PAPS et de Evenement
 
-public abstract class Interaction extends Encodable implements Backupable {
+public abstract class Interaction implements Backupable, Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 6376358620587929389L;
   // -----------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTS -------------------------------------------------------------------------------------------------------------
   // -----------------------------------------------------------------------------------------------------------------------

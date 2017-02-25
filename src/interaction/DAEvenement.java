@@ -22,7 +22,6 @@ public class DAEvenement extends DAO<Evenement> {
  // METHODES --------------------------------------------------------------------------------------------------------------
  // -----------------------------------------------------------------------------------------------------------------------
   
-  // Réécriture de la fonction DAO<Evenement>.getNewID() pour qu'elle créée en plus une table du nom evt_[id événement]
   @Override
   public int getNewID(){
     int id = super.getNewID();
@@ -51,7 +50,6 @@ public class DAEvenement extends DAO<Evenement> {
     return id;
   }
   
-  // Réécriture de la fonction DAO<Evenement>.supprimer(Evenement) pour supprimer la table evt_[id événement]
   @Override
   public boolean supprimer(Evenement evt){
     boolean reussi = super.supprimer(evt);
@@ -67,7 +65,6 @@ public class DAEvenement extends DAO<Evenement> {
     return reussi;
   }
   
-  // Idem pour DAO<Evenement>.supprimer(int)
   @Override
   public boolean supprimer(int id){
     boolean reussi = super.supprimer(id);
@@ -100,8 +97,6 @@ public class DAEvenement extends DAO<Evenement> {
     return evt;
   }
 
-  // Fonction appelée lorsque le nombre de places change et qu'il faut retirer des étudiants de liste principale. Renvoie l'ensemble
-  // des étudiants retirés
   public Set<Etudiant> updateEvenement(Evenement evt){
     Set<Etudiant> etudiantsRetires = new HashSet<Etudiant>();
     synchronized(DBModification.getInstance()){
@@ -109,7 +104,7 @@ public class DAEvenement extends DAO<Evenement> {
         String requestSelection = "SELECT id_etudiant " +
             "FROM " + evt.getTable() + 
             " WHERE liste_principale = TRUE " +
-            "ORDER BY ordre_adhesion DESC";
+            "ORDER BY id_etudiant DESC";
         String requestMAJ = "ALTER TABLE " + evt.getTable() + " SET liste_principale = FALSE WHERE id_etudiant = ?";
         
         PreparedStatement stmtSelection = connexion.prepareStatement(requestSelection);
@@ -124,12 +119,10 @@ public class DAEvenement extends DAO<Evenement> {
             //Forcément vérifié, car evt.placesRestantes < 0, donc on a au moins une personne
             //   sur liste principale car placesRestantes = places - taille liste principale et places >= 0
             id = r.getInt("id_etudiant");
+            etudiantsRetires.add(new Etudiant(r));
             
             stmtMAJ.setInt(1,id);
-            if (stmtMAJ.executeUpdate() == 1) {
-              etudiantsRetires.add(new Etudiant(r));
-              evt.placesRestantes++;
-            }
+            if (stmtMAJ.executeUpdate() == 1) evt.placesRestantes++;
           }
         }
       } catch (SQLException ex){
@@ -141,7 +134,6 @@ public class DAEvenement extends DAO<Evenement> {
     return etudiantsRetires;
   }
   
-  // Renvoie les participants sur liste principale
   public Set<Etudiant> participants(Evenement evt){
     Set<Etudiant> participants = new HashSet<>();
 
@@ -161,7 +153,6 @@ public class DAEvenement extends DAO<Evenement> {
     return participants;
   }
   
-  // Renvoie les étudiants sur liste principale ou sur liste d'attente
   public Set<Etudiant> inscrits(Evenement evt){
     Set<Etudiant> inscrits = new HashSet<>();
 
@@ -181,7 +172,6 @@ public class DAEvenement extends DAO<Evenement> {
     return inscrits;
   }
   
-  // Ajoute e sur la liste principale de evt. Renvoie false s'il n'y a pas assez de places
   public boolean ajouterPrincipale(Evenement evt, Etudiant e){
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
@@ -205,7 +195,6 @@ public class DAEvenement extends DAO<Evenement> {
     }
   }
   
-  // Ajoute e sur la liste d'attente de evt. 
   public boolean ajouterAttente(Evenement evt, Etudiant e){
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
