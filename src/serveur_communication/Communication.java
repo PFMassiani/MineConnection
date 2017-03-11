@@ -1,11 +1,13 @@
 package serveur_communication;
 
+import java.io.Serializable;
+
 import exception.InvalidParameterException;
-import utilisateur.Utilisateur;
-import interaction.Interaction;
 import utilitaire.Backupable;
 
-public class Communication {
+public class Communication implements Serializable{
+  private static final long serialVersionUID = 1L;
+	
   private TypeBackupable type;
   private Action action;
   private Backupable o;

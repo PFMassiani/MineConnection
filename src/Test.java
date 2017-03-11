@@ -1,12 +1,17 @@
 import exception.*;
 import java.util.*;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.sql.Date;
 
 import utilisateur.*;
 import interaction.*;
+import serveur_communication.*;
 
 @SuppressWarnings("unused")
 public class Test {
+	private static int port = 10000;
   public static void main(String[] args0) throws DuplicateIdentifierException{
 
 //    Evenement e = Evenement.chercher(34);
@@ -25,6 +30,7 @@ public class Test {
     
     viderEvenement();
     evenementParticipants();
+    testServeur();
     System.out.println("Done!");
   
   }
@@ -102,5 +108,22 @@ public class Test {
         System.out.println(e + " est compatible avec " + f + " : " + e.estCompatibleAvec(f));
       }
     }
+  }
+  
+  public static void testServeur() {
+	  try {
+		Socket serv = new Socket ("localhost", port);
+		
+		Evenement e = Evenement.getRandomEvent();
+		Communication com = new Communication (TypeBackupable.EVENEMENT, Action.SUPPRIMER_OBJ, e);
+		ObjectOutputStream oos = new ObjectOutputStream(serv.getOutputStream());
+		oos.writeObject(com);
+		serv.close();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (InvalidParameterException e) {
+		e.printStackTrace();
+	}
   }
 }

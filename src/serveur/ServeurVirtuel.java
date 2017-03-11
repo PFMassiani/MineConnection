@@ -30,8 +30,11 @@ public class ServeurVirtuel extends Thread {
       ois = new ObjectInputStream(is);
       os = client.getOutputStream();
       oos = new ObjectOutputStream(os);
+      
+      System.out.println("Connexion client établie");
     } catch (IOException e) {
             e.printStackTrace();
+            System.err.println("Connexion client refusée");
     }
   }
   
@@ -48,11 +51,14 @@ public class ServeurVirtuel extends Thread {
   @Override
   public void run(){
     while (!fin){
+    	System.out.println("Client actif");
       if (!pause){
         try{
           Object o = ois.readObject();
           if (!(o instanceof Communication)) throw new InvalidCommunicationException("La communication n'est pas du type Communication");
+          System.out.println("Récupération de la communication...");
           Communication com = (Communication) o;
+          System.out.println("Récupération de l'action...");
           Action action = com.getAction();
           switch (action){
           case CHARGER:
@@ -81,6 +87,7 @@ public class ServeurVirtuel extends Thread {
         }catch (InvalidCommunicationException e){
           e.printStackTrace();
         }
+        fin();
       }
     }
   }
@@ -115,20 +122,25 @@ public class ServeurVirtuel extends Thread {
   
   public boolean supprimer (Communication com){
     boolean reussi = false;
-
+    System.out.println("Suppression en cours...");
     if (com.getAction() == Action.SUPPRIMER_OBJ){
       Backupable o = com.getObjet();
 
       // On récupère la classe de o
       Class<?> c = o.getClass();
+      System.out.println("-----> Classe de l'objet :" + c);
       try {
         
         // On récupère la méthode supprimer()
-        Method m = c.getDeclaredMethod("supprimer", (Class<?>) null);
+        Method m = c.getDeclaredMethod("supprimer");
+        System.out.println("-----> Méthode de suppression :" + m);
+
 
         // Et si on la trouve, on l'applique
-        reussi = (boolean) m.invoke(c.cast(o),(Object) null);
-        
+        reussi = (boolean) m.invoke(c.cast(o));
+        System.out.println("-----> Réussite :" + reussi);
+
+        System.out.println("Suppression de " + c.cast(o) + " réussie !");
       } catch (NoSuchMethodException | 
           IllegalAccessException | 
           IllegalArgumentException | 

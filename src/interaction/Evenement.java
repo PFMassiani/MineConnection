@@ -222,4 +222,11 @@ public class Evenement extends Interaction {
     }
     return reussi;
   }
+  
+  public static Evenement getRandomEvent() {
+	  Set<Integer> ids = ids();
+	  
+	  for (int i : ids) return Evenement.chercher(i);
+	  return null;
+  }
 }
