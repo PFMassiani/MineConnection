@@ -4,11 +4,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
-
-import exception.MissingObjectException;
-
 import java.util.HashSet;
 
+import exception.MissingObjectException;
 import utilitaire.*;
 
 public abstract class DAO<T extends Backupable> {
@@ -135,12 +133,39 @@ public abstract class DAO<T extends Backupable> {
     return reussi;
   }
   
-  public abstract T chercher(int id);  
+  public T chercher(int id) {
+	  T t = null;
+	    
+	    try{
+	      ResultSet r = connexion.prepareStatement("SELECT * FROM " + table + " WHERE + " + champPrimaire + " = " + id).executeQuery();
+	      if (!r.next()) System.out.println("Aucun résultat");
+	      else t = charger(r);
+	      
+	    } catch (SQLException ex){
+	      System.out.println("SQLException: " + ex.getMessage());
+	      System.out.println("SQLState: " + ex.getSQLState());
+	      System.out.println("VendorError: " + ex.getErrorCode());
+	    }
+	    return t;
+  }
   
   protected void setChampPrimaire(String s){
     champPrimaire = s;
   }
   
-  public abstract Set<T> getAll();
+  public Set<T> getAll(){
+	  Set<T> all = new HashSet<>();
+	  try {
+		  ResultSet r = connexion.prepareStatement("SELECT * FROM Etudiant").executeQuery();
+		  while(r.next()) all.add(charger(r));
+	  } catch (SQLException ex) {
+		  System.out.println("SQLException: " + ex.getMessage());
+	      System.out.println("SQLState: " + ex.getSQLState());
+	      System.out.println("VendorError: " + ex.getErrorCode());
+	  }
+	  return all;
+  }
+  
+  public abstract T charger(ResultSet r) throws SQLException;
   
 }

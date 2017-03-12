@@ -82,19 +82,8 @@ public class DAEvenement extends DAO<Evenement> {
   }
   
   @Override
-  public Evenement chercher(int id) {
-    Evenement evt = null;
-    
-    try{
-      ResultSet r = connexion.prepareStatement("SELECT * FROM Evenement WHERE id = " + id).executeQuery();
-      if (r.next()) evt = new Evenement(r);
-      
-    } catch (SQLException ex){
-      System.out.println("SQLException: " + ex.getMessage());
-      System.out.println("SQLState: " + ex.getSQLState());
-      System.out.println("VendorError: " + ex.getErrorCode());
-    }
-    return evt;
+  public Evenement charger(ResultSet r) throws SQLException{
+	  return new Evenement(r);
   }
 
   public Set<Etudiant> updateEvenement(Evenement evt){

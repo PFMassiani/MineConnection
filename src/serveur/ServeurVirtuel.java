@@ -110,10 +110,19 @@ public class ServeurVirtuel extends Thread {
   
   public boolean sauvegarderObjet(Object o){
     boolean reussi = false;
-    if (o instanceof Etudiant) reussi = ((Etudiant) o).update();
-    else if (o instanceof Evenement) reussi = ((Evenement) o).update();
     
-    // TODO Cas où o est une Association ou un PAPS
+    Class<?> c = o.getClass();
+    try {
+    	
+    	Method m = c.getDeclaredMethod("update");
+    	m.invoke(c.cast(o));
+    	
+    } catch (NoSuchMethodException | 
+    		IllegalAccessException | 
+    		IllegalArgumentException | 
+    		InvocationTargetException ex) {
+    	ex.printStackTrace();
+    }
     
     return reussi;
   }
@@ -164,7 +173,7 @@ public class ServeurVirtuel extends Thread {
       Set<?> ids = (Set<?>) m.invoke(null);
 
       oos.writeObject(ids);
-      // TODO Envoyer les ids
+
     } catch (ClassNotFoundException | 
         IllegalAccessException | 
         IllegalArgumentException | 
@@ -187,7 +196,7 @@ public class ServeurVirtuel extends Thread {
       Set<?> all = (Set<?>) m.invoke(null);
 
       oos.writeObject(all);
-      // TODO Envoyer all
+
     } catch (ClassNotFoundException | 
         IllegalAccessException | 
         IllegalArgumentException | 

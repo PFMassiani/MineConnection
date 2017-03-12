@@ -1,6 +1,5 @@
-/interaction/
 /serveur/
-/exception/
-/bdd_communication/
-/utilisateur/
+/interaction/
 /serveur_communication/
+/utilisateur/
+/bdd_communication/

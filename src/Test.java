@@ -5,17 +5,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.Date;
+import java.sql.ResultSet;
 
 import utilisateur.*;
 import interaction.*;
 import serveur_communication.*;
+import bdd_communication.*;
 
 @SuppressWarnings("unused")
 public class Test {
 	private static int port = 10000;
 	public static void main(String[] args0) throws DuplicateIdentifierException{
-		viderEvenement();
-
+//		Evenement e;
+//		ResultSet r = Connexion.getConnection().prepareStatement("SELECT * FROM Evenement WHERE id = " + 6).executeQuery();
+//		r.next();
+//		evt = Evenement.charger(r);
+		
 		testServeur();
 		System.out.println("Done!");
 
@@ -58,7 +63,7 @@ public class Test {
 		int[] places = {10,20};
 		java.sql.Date[] date = {new java.sql.Date((new java.util.Date()).getTime()), new java.sql.Date(1000000000)};
 		int[] debutH = {1,2}, debutM = {30,40}, duree = {3,4};
-		Etudiant[] e = {Etudiant.chercher(75), Etudiant.chercher(76)};
+		Etudiant[] e = {Etudiant.getRandomStudent(), Etudiant.getRandomStudent()};
 
 		for (int i = 0; i < 2; i++) new Evenement(nom[i],description[i], places[i], date[i], debutH[i], debutM[i],duree[i],e[i]);
 	}
@@ -108,49 +113,56 @@ public class Test {
 		
 		Communication com;
 		Etudiant et;
+		Evenement evt;
 		Set<Etudiant> allStudents;
 		Set<Integer> allIDs;
 		int id = 0;
 		try {
+			System.out.println(Evenement.getRandomEvent() + "");
+			viderEvenement();
+			remplirEvenement();
 			Socket serv = new Socket ("localhost", port);
 			ObjectOutputStream oos = new ObjectOutputStream(serv.getOutputStream());
 			ObjectInputStream ois = new ObjectInputStream(serv.getInputStream());
-			// TEST SUPPRESSION EVENEMENT
-			// Remplissage en événements
-//			remplirEvenement();
-//			Evenement e = Evenement.getRandomEvent();
-//			id = e.getID();
-//			Communication com = new Communication (TypeBackupable.EVENEMENT, Action.SUPPRIMER_OBJ, e);
-//			ObjectOutputStream oos = new ObjectOutputStream(serv.getOutputStream());
-//			oos.writeObject(com);
-//
-//			e = Evenement.getRandomEvent();
-//			com = new Communication (TypeBackupable.EVENEMENT, Action.SUPPRIMER_ID, e.getID());
-//			oos.writeObject(com);
 			
+			// TESTS EVENEMENT
+
+			evt = Evenement.getRandomEvent();
+			System.out.println(evt + "");
+			com = new Communication (TypeBackupable.EVENEMENT, Action.CHARGER, evt.getID());
+			oos.writeObject(com);
+			evt = (Evenement) ois.readObject();
+			System.out.println("Événement chargé : " + evt);
 			
-			// TEST SUPPRESSION ETUDIANT
+			// Modification Evenement
+			evt.setNom("Nom modifié");
+			com = new Communication(TypeBackupable.EVENEMENT, Action.SAUVEGARDER, evt);
+			oos.writeObject(com);
+			com = new Communication(TypeBackupable.EVENEMENT, Action.CHARGER, evt.getID());
+			oos.writeObject(com);
+			evt = (Evenement) ois.readObject();
+			System.out.println("Événement modifié: " + evt);
+
 			
-			viderEvenement();
-			viderEtudiant();
-			remplirEtudiant();
+			// Suppression Evenement
+			com = new Communication (TypeBackupable.EVENEMENT, Action.SUPPRIMER, evt);
+			oos.writeObject(com);
+			System.out.println("Événement supprimé");
 			
-//			com = new Communication (TypeBackupable.ETUDIANT,Action.CHARGER,Etudiant.getRandomStudent().getID());
-//			oos.writeObject(com);
-//			et = (Etudiant) ois.readObject();
-//			System.out.println("Étudiant chargé: " + et);
+			// TESTS ETUDIANT
 			
-//			et = Etudiant.getRandomStudent();
-//			com = new Communication (TypeBackupable.ETUDIANT, Action.SUPPRIMER, et);
-//			oos.writeObject(com);
+			com = new Communication (TypeBackupable.ETUDIANT,Action.CHARGER,Etudiant.getRandomStudent().getID());
+			oos.writeObject(com);
+			et = (Etudiant) ois.readObject();
+			System.out.println("Étudiant chargé: " + et);
 			
-//			et.setNom("Nom changé");
-//			com = new Communication(TypeBackupable.ETUDIANT,Action.SAUVEGARDER,et);
-//			oos.writeObject(com);
-			
-//			et = Etudiant.getRandomStudent();
-//			com = new Communication (TypeBackupable.ETUDIANT, Action.SUPPRIMER, et.getID());
-//			oos.writeObject(com);
+			et.setNom("Nom changééé");
+			com = new Communication(TypeBackupable.ETUDIANT,Action.SAUVEGARDER,et);
+			oos.writeObject(com);
+			com = new Communication(TypeBackupable.ETUDIANT,Action.CHARGER,et.getID());
+			oos.writeObject(com);
+			et = (Etudiant) ois.readObject();
+			System.out.println("Étudiant modifié: " + et);
 			
 			com = new Communication(TypeBackupable.ETUDIANT, Action.GET_ALL,null);
 			oos.writeObject(com);
@@ -163,9 +175,12 @@ public class Test {
 			System.out.println(allStudents + "");
 			System.out.println(allIDs + "");
 			
+			com = new Communication (TypeBackupable.ETUDIANT, Action.SUPPRIMER, et);
+			oos.writeObject(com);
+			System.out.println("Étudiant supprimé");
+			
 			serv.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
 			e.printStackTrace();

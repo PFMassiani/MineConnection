@@ -3,7 +3,6 @@ package utilisateur;
 import java.sql.*;
 
 import exception.*;
-import interaction.Evenement;
 
 import java.util.Iterator;
 import java.util.Set;
