@@ -50,8 +50,8 @@ public class ServeurVirtuel extends Thread {
   
   @Override
   public void run(){
-    while (!fin){
-    	System.out.println("Client actif");
+	  int tours = 0;
+    while (!fin && tours < 1){
       if (!pause){
         try{
           Object o = ois.readObject();
@@ -67,8 +67,7 @@ public class ServeurVirtuel extends Thread {
           case SAUVEGARDER:
             sauvegarderObjet(com.getObjet());
             break;
-          case SUPPRIMER_ID:
-          case SUPPRIMER_OBJ:
+          case SUPPRIMER:
             supprimer(com);
             break;
           case GET_IDS:
@@ -83,11 +82,10 @@ public class ServeurVirtuel extends Thread {
         } catch (ClassNotFoundException e){
           e.printStackTrace();
         } catch (IOException e){
-          e.printStackTrace();
         }catch (InvalidCommunicationException e){
           e.printStackTrace();
         }
-        fin();
+//        tours ++;
       }
     }
   }
@@ -121,58 +119,39 @@ public class ServeurVirtuel extends Thread {
   }
   
   public boolean supprimer (Communication com){
-    boolean reussi = false;
-    System.out.println("Suppression en cours...");
-    if (com.getAction() == Action.SUPPRIMER_OBJ){
-      Backupable o = com.getObjet();
+	  boolean reussi = false;
+	  System.out.println("Suppression en cours...");
+	  Backupable o = com.getObjet();
 
-      // On récupère la classe de o
-      Class<?> c = o.getClass();
-      System.out.println("-----> Classe de l'objet :" + c);
-      try {
-        
-        // On récupère la méthode supprimer()
-        Method m = c.getDeclaredMethod("supprimer");
-        System.out.println("-----> Méthode de suppression :" + m);
-
-
-        // Et si on la trouve, on l'applique
-        reussi = (boolean) m.invoke(c.cast(o));
-        System.out.println("-----> Réussite :" + reussi);
-
-        System.out.println("Suppression de " + c.cast(o) + " réussie !");
-      } catch (NoSuchMethodException | 
-          IllegalAccessException | 
-          IllegalArgumentException | 
-          InvocationTargetException e) {
-        
-        e.printStackTrace();
-      }
-    }
+	  
+	  try {
+		  // On récupère la classe de o
+		  Class<?> c = Class.forName(com.getType().getNomClasse());
+		  System.out.println("-----> Classe de l'objet :" + c);
+		  // On récupère la méthode supprimer()
+		  Method m;
+		  if ( o != null) m = c.getDeclaredMethod("supprimer");
+		  else m = c.getDeclaredMethod("supprimer", int.class);
+		  System.out.println("-----> Méthode de suppression :" + m);
 
 
+		  // Et si on la trouve, on l'applique
+		  if (o != null) reussi = (boolean) m.invoke(c.cast(o));
+		  else reussi = (boolean) m.invoke(null,com.getID());
 
-    else if (com.getAction() == Action.SUPPRIMER_ID){
-      String nomClasse = com.getType().getNomClasse();
-      try{
-        
-        Class<?> c = Class.forName(nomClasse);
-        Method m = c.getDeclaredMethod("supprimer", (new Integer(0)).getClass());
-        reussi = (boolean) m.invoke(null,com.getID());
-      
-      } catch(ClassNotFoundException | 
-          NoSuchMethodException | 
-          IllegalAccessException | 
-          IllegalArgumentException | 
-          InvocationTargetException e){
-        
-        e.printStackTrace();
-      }
+		  System.out.println("-----> Réussite :" + reussi);
 
-    }
+	  } catch (NoSuchMethodException | 
+			  IllegalAccessException | 
+			  IllegalArgumentException | 
+			  InvocationTargetException | ClassNotFoundException e) {
+
+		  e.printStackTrace();
+	  }
 
 
-    return reussi;
+
+	  return reussi;
   }
  
 
@@ -181,8 +160,8 @@ public class ServeurVirtuel extends Thread {
     try{
 
       c = Class.forName(type.getNomClasse());
-      Method m = c.getDeclaredMethod("ids", (Class<?>) null);
-      Set<?> ids = (Set<?>) m.invoke(null, (Object) null);
+      Method m = c.getDeclaredMethod("ids");
+      Set<?> ids = (Set<?>) m.invoke(null);
 
       oos.writeObject(ids);
       // TODO Envoyer les ids
@@ -204,8 +183,8 @@ public class ServeurVirtuel extends Thread {
     try{
 
       c = Class.forName(type.getNomClasse());
-      Method m = c.getDeclaredMethod("getAll", (Class<?>) null);
-      Set<?> all = (Set<?>) m.invoke(null, (Object) null);
+      Method m = c.getDeclaredMethod("getAll");
+      Set<?> all = (Set<?>) m.invoke(null);
 
       oos.writeObject(all);
       // TODO Envoyer all

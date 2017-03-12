@@ -1,6 +1,7 @@
 package interaction;
 
 import java.sql.*;
+import java.util.Iterator;
 import java.util.Set;
 
 import utilisateur.*;
@@ -119,11 +120,11 @@ public class Evenement extends Interaction {
   // UTILITAIRE ---------------------------------------------------------------------------------------------------------
   // -----------------------------------------------------------------------------------------------------------------------
   
-  public boolean supprimer(){
+  public boolean supprimer() throws MissingObjectException{
     return dae.supprimer(this);
   }
   
-  public static boolean supprimer(int id){
+  public static boolean supprimer(int id) throws MissingObjectException{
     return dae.supprimer(id);
   }
   
@@ -225,8 +226,14 @@ public class Evenement extends Interaction {
   
   public static Evenement getRandomEvent() {
 	  Set<Integer> ids = ids();
+	  int randI = (int) ( Math.random() * ids.size() );
+	  Iterator<Integer> it = ids.iterator();
+	  int i = 0;
+	  while (it.hasNext() && randI >= 0) {
+		  i = it.next();
+		  randI --;
+	  }
 	  
-	  for (int i : ids) return Evenement.chercher(i);
-	  return null;
+	  return Evenement.chercher(i);
   }
 }

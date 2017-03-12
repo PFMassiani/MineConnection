@@ -2,6 +2,7 @@ package interaction;
 
 import bdd_communication.DAO;
 import bdd_communication.DBModification;
+import exception.MissingObjectException;
 import utilisateur.Etudiant;
 
 import java.sql.*;
@@ -51,7 +52,7 @@ public class DAEvenement extends DAO<Evenement> {
   }
   
   @Override
-  public boolean supprimer(Evenement evt){
+  public boolean supprimer(Evenement evt) throws MissingObjectException{
     boolean reussi = super.supprimer(evt);
     synchronized(DBModification.getInstance()){
       try{
@@ -66,7 +67,7 @@ public class DAEvenement extends DAO<Evenement> {
   }
   
   @Override
-  public boolean supprimer(int id){
+  public boolean supprimer(int id) throws MissingObjectException{
     boolean reussi = super.supprimer(id);
     synchronized(DBModification.getInstance()){
       try{
@@ -86,8 +87,7 @@ public class DAEvenement extends DAO<Evenement> {
     
     try{
       ResultSet r = connexion.prepareStatement("SELECT * FROM Evenement WHERE id = " + id).executeQuery();
-      r.next();
-      evt = new Evenement(r);
+      if (r.next()) evt = new Evenement(r);
       
     } catch (SQLException ex){
       System.out.println("SQLException: " + ex.getMessage());

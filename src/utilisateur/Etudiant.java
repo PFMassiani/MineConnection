@@ -3,6 +3,9 @@ package utilisateur;
 import java.sql.*;
 
 import exception.*;
+import interaction.Evenement;
+
+import java.util.Iterator;
 import java.util.Set;
 
 public class Etudiant extends Utilisateur {
@@ -92,10 +95,10 @@ public class Etudiant extends Utilisateur {
   // UTILITAIRE ------------------------------------------------------------------------------------------------------------
   // -----------------------------------------------------------------------------------------------------------------------
   
-  public boolean supprimer(){
+  public boolean supprimer() throws MissingObjectException{
     return dae.supprimer(this);
   }
-  public static boolean supprimer (int id){
+  public static boolean supprimer (int id) throws MissingObjectException{
     return dae.supprimer(id);
   }
   public boolean update(){
@@ -110,6 +113,23 @@ public class Etudiant extends Utilisateur {
   public static Set<Integer> ids(){
     return dae.ids();
   } 
+  
+  public static Etudiant getRandomStudent() {
+	  Set<Integer> ids = ids();
+	  int randI = (int) ( Math.random() * ids.size() );
+	  Iterator<Integer> it = ids.iterator();
+	  int i = 0;
+	  while (it.hasNext() && randI >= 0) {
+		  i = it.next();
+		  randI --;
+	  }
+	  
+	  return Etudiant.chercher(i);
+  }
+  
+  public static Set<Etudiant> getAll() {
+	  return dae.getAll();
+  }
   
 //  @Override
 //  public byte[] encoder(){

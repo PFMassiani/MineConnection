@@ -20,7 +20,7 @@ public class Communication implements Serializable{
     id = -1;
     switch (action){
     case SAUVEGARDER:
-    case SUPPRIMER_OBJ:
+    case SUPPRIMER:
       if (o == null) throw new InvalidParameterException("L'action demandée requiert un objet de type Utilisateur ou Interaction");
       break;
     default:
@@ -35,7 +35,7 @@ public class Communication implements Serializable{
     this.id = id;
     switch (action){
     case CHARGER:
-    case SUPPRIMER_ID:
+    case SUPPRIMER:
       if (id < 0) throw new InvalidParameterException("L'action demandée requiert un identifiant positif ( id = " + id);
       break;
     default:

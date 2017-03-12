@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
+
+import exception.MissingObjectException;
+
 import java.util.HashSet;
 
 import utilitaire.*;
@@ -78,10 +81,11 @@ public abstract class DAO<T extends Backupable> {
     return idMax;
   }
   
-  public boolean supprimer(T obj) {
+  public boolean supprimer(T obj) throws MissingObjectException{
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
       try{
+    	if ( chercher(obj.getID()) == null) throw new MissingObjectException("L'objet " + obj + " n'a pas pu être trouvé dans la table " + table);
         if( connexion.prepareStatement("DELETE FROM " + table + " WHERE " + champPrimaire + " = " + obj.getID()).executeUpdate() == 1) reussi = true;
         
       } catch (SQLException ex){
@@ -93,12 +97,12 @@ public abstract class DAO<T extends Backupable> {
     }
     return reussi;
   }
-  public boolean supprimer(int id) {
+  public boolean supprimer(int id) throws MissingObjectException {
     boolean reussi = false;
     synchronized(DBModification.getInstance()){
       try{
-        connexion.prepareStatement("DELETE FROM " + table + " WHERE " + champPrimaire + " = " + id).executeUpdate();
-        reussi = true;
+    	if ( chercher(id) == null) throw new MissingObjectException("L'objet d'ID " + id + " n'a pas pu être trouvé dans la table " + table);
+        if (connexion.prepareStatement("DELETE FROM " + table + " WHERE " + champPrimaire + " = " + id).executeUpdate() == 1 ) reussi = true;
       } catch (SQLException ex){
         System.out.println("SQLException: " + ex.getMessage());
         System.out.println("SQLState: " + ex.getSQLState());
@@ -136,4 +140,7 @@ public abstract class DAO<T extends Backupable> {
   protected void setChampPrimaire(String s){
     champPrimaire = s;
   }
+  
+  public abstract Set<T> getAll();
+  
 }
